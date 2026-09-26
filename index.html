@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>无锡 · 旅行手册（2026-09-28 → 2026-09-30）</title>
+<style>
+  :root{
+    --bg:#f7f7f8; --card:#fff; --text:#111; --muted:#666;
+    --accent-day:#2b8aef; --accent-day-2:#f39c12;
+    --accent-night:#7aa2ff;
+    --shadow: 0 6px 24px rgba(12,18,30,0.08);
+    font-family: Inter, "PingFang SC", "Helvetica Neue", Arial;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0b1220; --card:#0f1724; --text:#e6eef8; --muted:#9fb0d6;
+      --accent-day:#3b82f6; --accent-day-2:#f6ad55; --accent-night:#9fc0ff;
+      --shadow: 0 6px 24px rgba(0,0,0,0.6);
+    }
+  }
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);}
+  .wrap{max-width:980px;margin:18px auto;padding:18px;}
+  header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .title{font-size:18px;font-weight:700}
+  .subtitle{font-size:13px;color:var(--muted)}
+  .card{background:var(--card);border-radius:12px;padding:14px;box-shadow:var(--shadow);margin-bottom:12px}
+  /* 此刻关注卡 */
+  .focus{display:flex;gap:12px;align-items:center}
+  .countdown{font-size:28px;font-weight:700}
+  .next-meta{font-size:13px;color:var(--muted)}
+  .badge{background:linear-gradient(90deg,var(--accent-day),var(--accent-day-2));color:white;padding:6px 10px;border-radius:999px;font-size:12px}
+  /* 行程总览 SVG */
+  .map-wrap{padding:8px}
+  svg{width:100%;height:260px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.02));display:block}
+  .legend{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+  .legend .item{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
+  .dot{width:14px;height:8px;border-radius:6px}
+  /* Confirmed bookings */
+  .book-list{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .book-item{padding:10px;border-radius:8px;background:rgba(0,0,0,0.02)}
+  .small{font-size:12px;color:var(--muted)}
+  /* 逐日行程 */
+  .day{margin-bottom:10px}
+  .day-head{display:flex;justify-content:space-between;align-items:center}
+  .timeline{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+  .event{display:flex;gap:12px;align-items:flex-start}
+  .event .time{width:86px;font-weight:600}
+  .event .desc{flex:1}
+  .tag{display:inline-block;background:rgba(0,0,0,0.06);padding:3px 6px;border-radius:6px;font-size:12px;color:var(--muted)}
+  /* 待办 & 提示 */
+  .todo{list-style:none;padding-left:0;margin:6px 0;color:var(--text)}
+  .todo li{padding:4px 0}
+  footer{font-size:13px;color:var(--muted);margin-top:18px;text-align:center}
+  /* 控件 */
+  .btn{display:inline-block;padding:8px 12px;border-radius:8px;background:linear-gradient(90deg,var(--accent-day),var(--accent-day-2));color:white;text-decoration:none;font-weight:600}
+  .link{color:var(--accent-day);text-decoration:underline}
+  details summary{cursor:pointer}
+  /* Responsive */
+  @media (max-width:640px){
+    .book-list{grid-template-columns:1fr}
+    .countdown{font-size:22px}
+    svg{height:220px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="title">无锡 · 旅行手册</div>
+      <div class="subtitle">2026-09-28（周一）— 2026-09-30（周三） · 2 人 · 从常州·武进出发（公共交通）</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:12px;color:var(--muted)">页面说明：公开可访问，不含任何确认号/证件号/房间号</div>
+      <div style="margin-top:8px"><a class="btn" id="open-edit">编辑行程（仅本地保存）</a></div>
+    </div>
+  </header>
+
+  <!-- 此刻关注卡 -->
+  <section class="card">
+    <div class="focus">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+          <div class="badge">此刻关注</div>
+          <div style="font-weight:700">下一个事件</div>
+        </div>
+        <div id="nextEventTitle" style="font-size:15px;font-weight:700">高铁：常州 → 无锡（已购，示例车次）</div>
+        <div class="next-meta" id="nextEventTime">2026-09-28 08:30 (Asia/Shanghai) — 当地时间</div>
+      </div>
+      <div style="text-align:right">
+        <div class="countdown" id="countdown">-- 天 --:--:--</div>
+        <div class="small" id="countdownLocal">本地时间：--</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 行程总览地图 -->
+  <section class="card map-wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-weight:700">行程总览地图（手绘风）</div>
+      <div class="small">点地点可唤起 Google 地图；颜色代表天数</div>
+    </div>
+
+    <!-- 简易手绘 SVG 地图（示意） -->
+    <svg viewBox="0 0 1000 360" aria-hidden="true" id="mainMap">
+      <defs>
+        <filter id="grain" x="0" y="0" width="100%" height="100%">
+          <feTurbulence baseFrequency="0.9" numOctaves="1" stitchTiles="stitch"/>
+          <feColorMatrix type="saturate" values="0"/>
+        </filter>
+      </defs>
+
+      <!-- 背景地形块 -->
+      <rect x="0" y="0" width="1000" height="360" fill="url(#grad)" opacity="0.06"></rect>
+
+      <!-- Day 1 route (purple/blue) -->
+      <path d="M140 280 C220 200, 340 200, 420 180" fill="none" stroke="#3b82f6" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity="0.9" />
+      <!-- Day 2 route (orange) -->
+      <path d="M420 180 C520 160, 640 140, 760 120" fill="none" stroke="#f39c12" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity="0.9" />
+      <!-- Day 3 route (green) -->
+      <path d="M760 120 C820 100, 880 60, 920 40" fill="none" stroke="#10b981" stroke-width="8" stroke-linecap="round" opacity="0.9" />
+
+      <!-- Points -->
+      <!-- Start: Wujin / Changzhou -->
+      <g transform="translate(120,290)">
+        <a href="https://www.google.com/maps/search/?api=1&query=常州 武进" target="_blank" rel="noopener">
+          <circle r="8" fill="#1f2937"></circle>
+        </a>
+        <text x="18" y="6" font-size="12" fill="var(--text)">常州 · 武进（出发）</text>
+      </g>
+
+      <!-- Yuantouzhu (鼋头渚) -->
+      <g transform="translate(420,180)">
+        <a href="https://www.google.com/maps/search/?api=1&query=鼋头渚" target="_blank" rel="noopener">
+          <circle r="10" fill="#3b82f6"></circle>
+        </a>
+        <text x="16" y="6" font-size="12" fill="var(--text)">鼋头渚（Day 1）</text>
+      </g>
+
+      <!-- Lingshan (灵山大佛) -->
+      <g transform="translate(640,140)">
+        <a href="https://www.google.com/maps/search/?api=1&query=灵山大佛" target="_blank" rel="noopener">
+          <rect x="-10" y="-10" width="20" height="20" rx="4" fill="#f39c12"></rect>
+        </a>
+        <text x="16" y="6" font-size="12" fill="var(--text)">灵山大佛（Day 2）</text>
+      </g>
+
+      <!-- Nanchan (南禅寺/南长街) -->
+      <g transform="translate(820,80)">
+        <a href="https://www.google.com/maps/search/?api=1&query=南禅寺 无锡" target="_blank" rel="noopener">
+          <circle r="8" fill="#10b981"></circle>
+        </a>
+        <text x="16" y="6" font-size="12" fill="var(--text)">南禅寺 / 南长街（Day 2 夜）</text>
+      </g>
+    </svg>
+
+    <div class="legend">
+      <div class="item"><span class="dot" style="background:#3b82f6"></span> Day 1 · 鼋头渚</div>
+      <div class="item"><span class="dot" style="background:#f39c12"></span> Day 2 · 灵山大佛</div>
+      <div class="item"><span class="dot" style="background:#10b981"></span> Day 3 · 市区 & 返回</div>
+    </div>
+  </section>
+
+  <!-- 确认项：机票/车票/酒店/门票（没有写确认号） -->
+  <section class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-weight:700">已确认（示例条目，未包含任何敏感信息）</div>
+      <div class="small">如果实际时间不同，请把截图发给我以便我核验并更新</div>
+    </div>
+
+    <div class="book-list" style="margin-top:8px">
+      <div class="book-item">
+        <div style="font-weight:700">高铁（往程）</div>
+        <div class="small">2026-09-28 08:30 — 常州站 → 无锡站（已购）</div>
+        <div class="small" style="margin-top:6px">出行方式：公共交通 · 建议 07:00 从武进出发前往车站</div>
+      </div>
+
+      <div class="book-item">
+        <div style="font-weight:700">高铁（返程）</div>
+        <div class="small">2026-09-30 16:30 — 无锡站 → 常州站（已购）</div>
+        <div class="small" style="margin-top:6px">建议提前 30-60 分钟到站候车</div>
+      </div>
+
+      <div class="book-item">
+        <div style="font-weight:700">酒店（示例）</div>
+        <div class="small">2026-09-28 — 2026-09-30 · 无锡市区 · 靠近南禅寺 / 火车站（已订）</div>
+        <div class="small" style="margin-top:6px">地址与电话：页面不展示确认号/房间号</div>
+      </div>
+
+      <div class="book-item">
+        <div style="font-weight:700">景区门票</div>
+        <div class="small">鼋头渚门票（2026-09-28 上午已购） · 灵山大佛门票（2026-09-29 上午已购）</div>
+        <div class="small" style="margin-top:6px">如需坐游船或观看梵宫演出，演出票请单独核对场次</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 逐日行程 -->
+  <section class="card">
+    <div style="font-weight:700;margin-bottom:8px">逐日行程（按时间显示时区；标注需提前预订项）</div>
+
+    <div class="day">
+      <div class="day-head">
+        <div style="font-weight:700">Day 1 · 2026-09-28（周一）</div>
+        <div class="small">交通：高铁（已购） · 主要景点：鼋头渚</div>
+      </div>
+
+      <div class="timeline">
+        <div class="event">
+          <div class="time">07:00</div>
+          <div class="desc">从常州·武进出发前往常州站（本地打车/网约）。</div>
+        </div>
+
+        <div class="event">
+          <div class="time">08:30</div>
+          <div class="desc">高铁：常州站 → 无锡站（示例时刻；请替换为你的车次时间）。</div>
+        </div>
+
+        <div class="event">
+          <div class="time">10:00</div>
+          <div class="desc">鼋头渚（太湖风景区）游览 · 需提前购票（已假定已购）。建议预留 2–3 小时。<span class="tag">需预约</span></div>
+        </div>
+
+        <div class="event">
+          <div class="time">17:00</div>
+          <div class="desc">太湖日落或返回市区，晚餐推荐：无锡本地菜（排骨、太湖三白）。</div>
+        </div>
+      </div>
+
+      <details style="margin-top:8px"><summary class="small">展开当日路线地图</summary>
+        <div style="margin-top:8px">
+          <svg viewBox="0 0 1000 160" style="width:100%;height:160px;border-radius:8px;">
+            <path d="M60 120 C180 80, 360 80, 520 60" fill="none" stroke="#3b82f6" stroke-width="8" stroke-linecap="round"/>
+            <g transform="translate(60,120)"><circle r="6" fill="#111"/><text x="14" y="6" font-size="12">常州·武进（出发）</text></g>
+            <g transform="translate(520,60)"><circle r="7" fill="#3b82f6"/><text x="14" y="6" font-size="12">鼋头渚</text></g>
+          </svg>
+          <div style="margin-top:8px">
+            <a id="day1Nav" class="btn" href="#" target="_blank">一键打开全天多点导航（Google Maps）</a>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <div class="day">
+      <div class="day-head">
+        <div style="font-weight:700">Day 2 · 2026-09-29（周二）</div>
+        <div class="small">主要景点：灵山大佛、惠山古镇、南禅寺夜市</div>
+      </div>
+
+      <div class="timeline">
+        <div class="event">
+          <div class="time">08:00</div>
+          <div class="desc">出发前往灵山大佛 · 建议早到以避开高峰。</div>
+        </div>
+
+        <div class="event">
+          <div class="time">09:00</div>
+          <div class="desc">灵山大佛 / 梵宫（需门票；若要看梵宫演出，请提前购买演出票并留出入场时间）<span class="tag">需预约</span></div>
+        </div>
+
+        <div class="event">
+          <div class="time">14:30</div>
+          <div class="desc">惠山古镇 / 锡惠公园文化漫步。</div>
+        </div>
+
+        <div class="event">
+          <div class="time">18:30</div>
+          <div class="desc">南禅寺 / 南长街夜市 · 晚餐与购物。</div>
+        </div>
+      </div>
+
+      <details style="margin-top:8px"><summary class="small">展开当日路线地图</summary>
+        <div style="margin-top:8px">
+          <svg viewBox="0 0 1000 160" style="width:100%;height:160px;border-radius:8px;">
+            <path d="M120 120 C340 80, 520 60, 760 40" fill="none" stroke="#f39c12" stroke-width="8" stroke-linecap="round"/>
+            <g transform="translate(120,120)"><circle r="6" fill="#111"/><text x="14" y="6" font-size="12">市区（出发）</text></g>
+            <g transform="translate(520,60)"><rect x="-6" y="-6" width="12" height="12" fill="#f39c12"/><text x="14" y="6" font-size="12">灵山大佛</text></g>
+          </svg>
+          <div style="margin-top:8px">
+            <a id="day2Nav" class="btn" href="#" target="_blank">一键打开全天多点导航（Google Maps）</a>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <div class="day">
+      <div class="day-head">
+        <div style="font-weight:700">Day 3 · 2026-09-30（周三）</div>
+        <div class="small">上午文化/园林或影视基地，下午返程</div>
+      </div>
+
+      <div class="timeline">
+        <div class="event">
+          <div class="time">08:30</div>
+          <div class="desc">寄畅园 / 无锡博物院 或 三国城（按兴趣选择）。部分博物馆周一闭馆，出发前二次确认开放日。</div>
+        </div>
+        <div class="event">
+          <div class="time">14:00</div>
+          <div class="desc">回到市区微歇，准备返程。</div>
+        </div>
+        <div class="event">
+          <div class="time">16:30</div>
+          <div class="desc">高铁：无锡站 → 常州站（示例时刻；请替换为你的实际车次）。</div>
+        </div>
+      </div>
+
+      <details style="margin-top:8px"><summary class="small">展开当日路线地图</summary>
+        <div style="margin-top:8px">
+          <svg viewBox="0 0 1000 160" style="width:100%;height:160px;border-radius:8px;">
+            <path d="M200 120 C420 80, 640 40, 880 20" fill="none" stroke="#10b981" stroke-width="8" stroke-linecap="round"/>
+            <g transform="translate(200,120)"><circle r="6" fill="#111"/><text x="14" y="6" font-size="12">市区（早）</text></g>
+            <g transform="translate(880,20)"><circle r="6" fill="#10b981"/><text x="14" y="6" font-size="12">返程站点</text></g>
+          </svg>
+          <div style="margin-top:8px">
+            <a id="day3Nav" class="btn" href="#" target="_blank">一键打开全天多点导航（Google Maps）</a>
+          </div>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- 待办清单 -->
+  <section class="card">
+    <div style="font-weight:700">待办清单（纯文本列表，页面不做同步勾选）</div>
+    <ul class="todo" id="todoList">
+      <li>高铁往返车票：核对车次与车厢（已假定已购）</li>
+      <li>鼋头渚门票：确认入园时间段与游船票（若需）</li>
+      <li>灵山大佛门票：核对演出票/入场时间</li>
+      <li>酒店：确认入住/退房时间并留出退房到站时间</li>
+      <li>下载并保存该页面（浏览器另存为），离线可看</li>
+    </ul>
+    <div class="small">办完一项告诉我，我会更新并把页面重新打包给你（或你直接在页面内修改并保存本地）。</div>
+  </section>
+
+  <!-- 实用贴士 -->
+  <section class="card">
+    <div style="font-weight:700">实用贴士</div>
+    <ul style="margin-top:8px">
+      <li>景区与演出：灵山、鼋头渚、博物馆部分场馆可能需实名预约或周一闭馆，出行前 48 小时再核验官网开放日。</li>
+      <li>跨时区显示：本页面所有时间使用事件本地时区（Asia/Shanghai）并显示本地时间。倒计时基于 UTC 时间点计算，跨时区打开也能正确显示到点剩余时间。</li>
+      <li>导航：地点点击会打开 Google Maps；手机上可直接唤起导航（取决于设备设置）。</li>
+      <li>隐私：页面不包含任何确认号/证件号/房间号。若需把这些放入，仅保存在本地（本地编辑模式）。</li>
+    </ul>
+  </section>
+
+  <footer class="small">如需我代为把此文件放到你的 GitHub 并配置 Cloudflare（push 自动部署到 Workers），我可以生成仓库内容和 CI 文件，但你需要在 Cloudflare 控制台创建 API Token 并在 GitHub 仓库添加 Secrets（下面步骤详述）。</footer>
+</div>
+
+<script>
+/*
+  说明：
+  - 页面内事件数据以 ISO 字符串（含时区偏移）存放在 events[] 中；
+  - 倒计时以事件的 UTC 实际瞬时时间计算，确保跨时区一致；
+  - 地点导航按钮根据地址/地名构建 Google Maps URL（可直接在手机上打开）。
+  - 编辑按钮会打开本地编辑模式（编辑仅保存到浏览器 localStorage，不会上传）。
+*/
+
+/* === 示例事件数据（你可以按需替换为真实购票时间） ===
+   格式: { id, title, startISO, locationQuery, tzDisplay }
+   startISO 必须为包含时区偏移的 ISO 字符串，比如 "2026-09-28T08:30:00+08:00"
+*/
+const events = [
+  { id:'t1', title:'高铁：常州 → 无锡（已购）', startISO:'2026-09-28T08:30:00+08:00', locationQuery:'无锡站', tzDisplay:'Asia/Shanghai' },
+  { id:'v1', title:'鼋头渚 · 入园', startISO:'2026-09-28T10:00:00+08:00', locationQuery:'鼋头渚', tzDisplay:'Asia/Shanghai' },
+  { id:'v2', title:'灵山大佛 · 入园', startISO:'2026-09-29T09:00:00+08:00', locationQuery:'灵山大佛', tzDisplay:'Asia/Shanghai' },
+  { id:'t2', title:'高铁：无锡 → 常州（返程）', startISO:'2026-09-30T16:30:00+08:00', locationQuery:'常州站', tzDisplay:'Asia/Shanghai' }
+];
+
+/* Helper: parse ISO with timezone into Date (works with ISO+offset) */
+function parseISO(iso){ return new Date(iso); }
+
+/* Find next event after now */
+function findNextEvent(){
+  const now = new Date();
+  return events.map(e=>({...e, date:parseISO(e.startISO)}))
+    .filter(e=>e.date.getTime() > now.getTime())
+    .sort((a,b)=>a.date - b.date)[0] || null;
+}
+
+/* Countdown renderer */
+function renderCountdown(){
+  const next = findNextEvent();
+  const cTitle = document.getElementById('nextEventTitle');
+  const cTime = document.getElementById('nextEventTime');
+  const cd = document.getElementById('countdown');
+  const cdLocal = document.getElementById('countdownLocal');
+
+  if(!next){
+    cTitle.textContent = '行程已结束或无待办事件';
+    cTime.textContent = '';
+    cd.textContent = '-- 天 --:--:--';
+    return;
+  }
+  cTitle.textContent = next.title;
+  // human friendly with zone
+  const fmt = new Intl.DateTimeFormat(undefined, {
+    year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',timeZoneName:'short'
+  });
+  cTime.textContent = `${fmt.format(next.date)} （事件时区：${next.tzDisplay}）`;
+
+  function tick(){
+    const now = new Date();
+    let diff = Math.max(0, Math.floor((next.date.getTime() - now.getTime())/1000));
+    const days = Math.floor(diff / 86400); diff %= 86400;
+    const hh = String(Math.floor(diff/3600)).padStart(2,'0'); diff%=3600;
+    const mm = String(Math.floor(diff/60)).padStart(2,'0'); const ss = String(diff%60).padStart(2,'0');
+    cd.textContent = `${days} 天 ${hh}:${mm}:${ss}`;
+    // Also show local now
+    const localFmt = new Intl.DateTimeFormat(undefined,{hour:'2-digit',minute:'2-digit',second:'2-digit',timeZoneName:'short'});
+    cdLocal.textContent = '本地时间：' + localFmt.format(now);
+  }
+  tick();
+  clearInterval(window._countdownTimer);
+  window._countdownTimer = setInterval(tick,1000);
+}
+
+/* Build day navigation URLs (Google Maps Directions)
+   For each day we construct a suitable origin/destination/waypoints if available.
+   For simplicity we map by day:
+*/
+function encode(q){ return encodeURIComponent(q); }
+
+document.addEventListener('DOMContentLoaded',()=>{
+  renderCountdown();
+
+  // Build day navigation links (examples)
+  const day1Origin = '常州 武进';
+  const day1Waypoints = '鼋头渚';
+  document.getElementById('day1Nav').href = `https://www.google.com/maps/dir/?api=1&origin=${encode(day1Origin)}&destination=${encode('鼋头渚')}&travelmode=driving`;
+
+  document.getElementById('day2Nav').href = `https://www.google.com/maps/dir/?api=1&origin=${encode('无锡市区')}&destination=${encode('灵山大佛')}&travelmode=driving`;
+  document.getElementById('day3Nav').href = `https://www.google.com/maps/dir/?api=1&origin=${encode('无锡市区')}&destination=${encode('常州站')}&travelmode=driving`;
+
+  // Attach main map clicks (open Google Maps with query)
+  // (already using <a> in SVG so default behavior is fine)
+
+  // Open-edit: local edit form (localStorage only)
+  document.getElementById('open-edit').addEventListener('click',()=>{
+    openEditor();
+  });
+
+  // Update next event every minute in case local time changes
+  setInterval(renderCountdown, 60*1000);
+});
+
+/* === 简易本地编辑器（所有修改仅保存在 localStorage） === */
+function openEditor(){
+  const saved = localStorage.getItem('wg_itinerary_data');
+  const text = saved || JSON.stringify(events, null, 2);
+  const w = window.open('', '_blank', 'width=800,height=700,scrollbars=yes');
+  w.document.write(`<html><head><title>编辑 — 本地保存</title></head><body style="font-family:Arial;padding:12px">
+    <h3>本地编辑（不会上传）</h3>
+    <p>请在下面 JSON 中编辑事件数组（不要包含确认号/证件）。保存后在原页面选择“重新加载数据”。</p>
+    <textarea id="ta" style="width:100%;height:400px;font-family:monospace">${text}</textarea>
+    <div style="margin-top:12px">
+      <button id="save">保存到本地（localStorage）</button>
+      <button id="reload">保存并让原页重新加载（请在原页手动点击）</button>
+    </div>
+    <script>
+      document.getElementById('save').addEventListener('click',()=>{
+        try{
+          JSON.parse(document.getElementById('ta').value);
+          localStorage.setItem('wg_itinerary_data', document.getElementById('ta').value);
+          alert('已保存到 localStorage（本浏览器）');
+        }catch(e){
+          alert('JSON 解析失败：' + e.message);
+        }
+      });
+      document.getElementById('reload').addEventListener('click',()=>{
+        try{
+          JSON.parse(document.getElementById('ta').value);
+          localStorage.setItem('wg_itinerary_data', document.getElementById('ta').value);
+          alert('已保存。请回到原页面并点击“重新加载数据”按钮（如果没有，请刷新页面）');
+        }catch(e){
+          alert('JSON 解析失败：' + e.message);
+        }
+      });
+    </script>
+  </body></html>`);
+}
+
+/* You can add a "Reload local data" function if needed.
+   For privacy, data stays in localStorage and never sent.
+*/
+</script>
+</body>
+</html>
